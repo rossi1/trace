@@ -1,8 +1,7 @@
 from flask_wtf import FlaskForm, RecaptchaField
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, IntegerField
-from wtforms.validators import DataRequired, EqualTo, Email, ValidationError, Length
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, RadioField
+from wtforms.validators import DataRequired, EqualTo, Email, ValidationError, Length, Optional
 from .models import User
-from wtforms.fields import FormField
 
 
 class RegistrationForm(FlaskForm):
@@ -26,22 +25,15 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('This Username is already taken')
 
 
-class TelephoneForm(FlaskForm):
-    area_code = StringField('Area code', validators=[DataRequired()])
-    country_code = StringField('Country code', validators=[DataRequired()])
-    number = StringField('Number', validators=[DataRequired()])
-
-
 class CompleteRegistrationForm(FlaskForm):
     address = StringField('Address', validators=[DataRequired()])
+    city = StringField('City', validators=[DataRequired()])
     state = StringField('State', validators=[DataRequired()])
-    postal_code = StringField('Post code', validators=[DataRequired()])
-    country = StringField('Country', validators=[DataRequired()])
-    """ reused the TelephoneForm to encapsulate the common telephone entry instead of
-      writing a custom field to handle the 3 sub-fields
-    """
-    phone_number = FormField(TelephoneForm)
+    postal_code = StringField('Postal code', validators=[Optional()])
+    phone_number = StringField('Phone number', validators={DataRequired()})
+    date_of_birth = DateField('Date of birth', validators=[Optional()], format='%Y/%m/%d')
     recaptha = RecaptchaField()
+    accept_tos = BooleanField('Accept', default=False, validators=[DataRequired()])
     submit = SubmitField('Create Account')
 
 
@@ -51,3 +43,22 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Keep me logged in', default=False)
     submit = SubmitField('Sign in')
+
+
+"""The following two forms belows handles the reset password recovery
+"""
+
+
+class EmailForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('submit')
+
+    def validate_email(self, field):
+        if not User.query.filter_by(email=field.data).first():
+            raise ValidationError('This Email does not exist with any account')
+
+
+class PasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired(), EqualTo('confirm_password', message='Password must match')])
+    confirm_password = PasswordField('Confirm Password')
+    submit = SubmitField('submit')
