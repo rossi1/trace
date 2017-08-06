@@ -3,7 +3,7 @@
 {% block title %}Flasky - Login{% endblock %}
 {% block page_content %}
     <div class="page-header">
-        {{ form.hidden_tag() }}
+        {{ form.csrf_token }}
         <h1>Sign up</h1></div>
     <div class="col-md-4">
         {{ wtf.quick_form(form) }}
