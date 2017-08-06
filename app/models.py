@@ -21,12 +21,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(120), unique=True)
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String)
-    phone_number = db.Column(db.String)
-    account_confirmed = db.Column(db.Boolean, default=False)
-    date_of_birth = db.Column(db.DateTime)
     email_confirmed = db.Column(db.Boolean, default=False)
-    phone_number_confirmed = db.Column(db.Boolean, default=False)
-    users = db.relationship('Address', backref='user', lazy='dynamic')
+
 
 
     @property
@@ -44,18 +40,22 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         """This method is used for debugging"""
-        return 'Person {}'.format(self.username)
+        return 'User {}'.format(self.username)
 
 
-class Address(db.Model):
-    __tablename__ = 'Address'
+class PrivateDetails(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    address = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    country = db.Column(db.String(120))
+    address = db.Column(db.String(200))
+    city = db.Column(db.String(160))
+    state = db.Column(db.String(100))
     postal_code = db.Column(db.String(50))
-    user_id = db.Column(db.Integer, db.ForeignKey('User.id'))
+    phone_number = db.Column(db.String)
+    date_of_birth = db.Column(db.DateTime)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
     def __repr__(self):
-        return 'Address {}'.format(self.address)
+        return 'User {}'.format(self.address)
+
+
+
