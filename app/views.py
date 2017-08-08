@@ -138,18 +138,37 @@ def confirm_email(token):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:  # this avoids multiple login from a particular user
-        return redirect(url_for('index'))
     form = LoginForm()
+
     if form.validate_on_submit():
+
         user = User.query.filter_by(username=form.username.data).first()
+
         if user is not None and user.verify_password(form.password.data):
+
             if user.email_confirmed:
+
                 login_user(user, form.remember_me.data)
-                return redirect(request.args.get('next') or url_for('index'))
-            return 'Email not confirmed'
-        flash('invalid login credentials')
-    return render_template('login.html', form=form)
+
+                return jsonify({
+                    'status': True,
+                    'message': 'Login Successful',
+                    'url': request.args.get('next') or 'index')
+                })
+                #  return redirect(request.args.get('next') or url_for('index'))
+            return jsonify({
+                'status': False,
+                'message': 'Email has/nt been verified, you can/t login at the moment',
+                'url': url_for('')
+            })
+            #  flash('Mail not configured')
+        else:
+            return jsonify({
+                'message': 'Invalid Login Credentials',
+                'Status': False}
+            )
+        #  flash('invalid login credentials')
+    # return render_template('login.html', form=form)
 
 
 @app.route('/reset', methods=['GET', 'POST'])
