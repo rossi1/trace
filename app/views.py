@@ -164,7 +164,7 @@ def login():
                 return jsonify({
                     'status': True,
                     'code': 200,
-                    'message': 'Login Successful',
+                    'msg': 'Login Successful',
                     'url': url_for(request.args.get('next') or 'index')
                 })
                 #  return redirect(request.args.get('next') or url_for('index'))
@@ -176,7 +176,7 @@ def login():
             #  flash('Mail not configured')
         else:
             return jsonify({
-                'message': 'Invalid Login Credentials',
+                'msg': 'Invalid Login Credentials',
                 'Status': False,
                 'url': '/login'
             }
