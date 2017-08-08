@@ -7,6 +7,20 @@ from flask_login import login_required, current_user, login_user,  logout_user
 from .security import generate_confirmation_token, confirm_token
 from .email import send_email
 from sqlalchemy.exc import IntegrityError
+from functools import wraps
+
+
+def complete_registration(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+
+        if g.user.account_confirmed is True:
+            return f(*args, **kwargs)
+        else:
+            flash('You need to Fill up your personal details before you can continue')
+            return redirect(url_for('complete_signup'))
+
+    return wrap
 
 
 @app.errorhandler(404)
@@ -24,20 +38,28 @@ def server_error(e):
 
 @app.before_request
 def before_request():
-    if current_user.is_authenticated:
-        return jsonify({
-            'msg': 'User already logged in',
-            'url': '/'
-            })
-    else:
-        return jsonify({
-            'msg': 'User not logged in',
-            'url': '/login'
-        })
+    g.user = current_user
         
+@app.route('/complete/signup', methods=['GET', 'POST'])
+@login_required
+@complete_registration
+def complete_signup():
 
-        #  return redirect(url_for('index'))
+    form = CompleteForm()
 
+    if form.validate_on_submit():
+        g.user = PrivateDetails(address=form.address.data, city=form.city.data, state=form.state.data,
+                                postal_code=form.postal_code.data, phone_number=form.phone_number.data,
+                                date_of_birth=form.date_of_birth.data)
+                         
+        g.user.account_confirmed = True
+
+        db.session.add(g.user)
+        db.session.commit()
+
+        return redirect(url_for('index'))
+
+    return render_template('test.html', form=form)
 
 @app.route('/')
 @login_required
