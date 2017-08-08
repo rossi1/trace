@@ -14,14 +14,12 @@ def complete_registration(f):
     @wraps(f)
     def wrap(*args, **kwargs):
 
-        if g.user.account_confirmed is True:
-            return f(*args, **kwargs)
-        else:
-            flash('You need to Fill up your personal details before you can continue')
+        if current_user.account_confirmed is False:
             return redirect(url_for('complete_signup'))
+        else:
+            return f(*args, **kwargs)
 
     return wrap
-
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -40,27 +38,7 @@ def server_error(e):
 def before_request():
     g.user = current_user
         
-@app.route('/complete/signup', methods=['GET', 'POST'])
-@login_required
-@complete_registration
-def complete_signup():
-
-    form = CompleteForm()
-
-    if form.validate_on_submit():
-        g.user = PrivateDetails(address=form.address.data, city=form.city.data, state=form.state.data,
-                                postal_code=form.postal_code.data, phone_number=form.phone_number.data,
-                                date_of_birth=form.date_of_birth.data)
                          
-        g.user.account_confirmed = True
-
-        db.session.add(g.user)
-        db.session.commit()
-
-        return redirect(url_for('index'))
-
-    return render_template('test.html', form=form)
-
 @app.route('/')
 @login_required
 def index():
@@ -117,26 +95,34 @@ def signup():
 
     #  return render_template('register.html', form=form)
 
-
-
-
-
-
 @app.route('/complete/signup', methods=['GET', 'POST'])
+@login_required
 def complete_signup():
 
-    form = CompleteRegistrationForm()
+    form = CompleteForm()
 
     if form.validate_on_submit():
-        user = CompleteRegistrationForm(address=form.address.data, city=form.city.data, state=form.state.data,
-                                         poatal_code=form.postal_code.data, phone_number=form.phone_number.data,
-                                         date_of_birth=form.date_of_birth.data)
-        db.session.add(user)
+        g.user = PrivateDetails(address=form.address.data, city=form.city.data, state=form.state.data,
+                                postal_code=form.postal_code.data, phone_number=form.phone_number.data,
+                                date_of_birth=form.date_of_birth.data)
+
+        current_user.account_confirmed = True
+
+        db.session.add(g.user)
         db.session.commit()
 
-        return redirect(url_for('login'))
+        return jsonify({
+            'status': True,
+            'msg': 'success',
+            'url': '/index'
+        })
 
-    return render_template('test.html', form=form)
+    else:
+        return jsonify({
+            'status': False,
+            'msg': 'check your post form'
+        })
+
 
 
 @app.route('/confirm/<token>')
