@@ -77,7 +77,7 @@ def signup():
             'status': True,
             'code': 200,
             'msg': 'A confirmation email has been sent to you',
-            'url': url_for('complete_signup')
+            'url':  '/complete/signup'
         })
 
     else:
@@ -94,7 +94,7 @@ def signup():
 
 
 
-@app.route('/completesignup', methods=['GET', 'POST'])
+@app.route('/complete/signup', methods=['GET', 'POST'])
 def complete_signup():
 
     form = CompleteRegistrationForm()
@@ -185,7 +185,7 @@ def login():
     # return render_template('login.html', form=form)
 
 
-@app.route('/reset', methods=['POST'])
+@app.route('/reset/password', methods=['POST'])
 def reset():
     form = EmailForm()
 
