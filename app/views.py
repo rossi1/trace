@@ -172,17 +172,22 @@ def login():
                 #  return redirect(request.args.get('next') or url_for('index'))
             return jsonify({
                 'status': False,
-                'message': 'Email has/nt been verified, you can/t login at the moment',
+                'msg': 'Email has/nt been verified, you can/t login at the moment',
                 'url': '/'
             })
             #  flash('Mail not configured')
         else:
             return jsonify({
                 'msg': 'Invalid Login Credentials',
-                'Status': False,
+                'status': False,
                 'url': '/login'
             }
             )
+    else:
+        return jsonify({
+            'status': False,
+            'msg': 'check your post form'
+        })
         #  flash('invalid login credentials')
     # return render_template('login.html', form=form)
 
