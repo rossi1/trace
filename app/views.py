@@ -25,8 +25,9 @@ def server_error(e):
 def before_request():
     if current_user.is_authenticated:
         return jsonify({
-            'Message': 'User already logged in',
-            'url': url_for('index')
+            'msg': 'User already logged in',
+            'url': '/index'
+            'code': 200
             })
 
         #  return redirect(url_for('index'))
@@ -37,7 +38,7 @@ def before_request():
 def index():
     return jsonify({
         'code': 200,
-        'status': 'okay'
+        'status': True
     })
 
     #  return render_template('index.html')
@@ -122,18 +123,28 @@ def confirm_email(token):
     try:
         email = confirm_token(token)
     except Exception as e:
-        flash('The confirmation link is invalid or has expired.', 'danger')
-        abort(404)
+        return jsonify({
+            'msg': 'The confirmation link is invalid or has expired, danger',
+            'status': False,
+            'code': 404
+        })
+        # flash('The confirmation link is invalid or has expired.', 'danger')
+        #  abort(404)
 
     user = User.query.filter_by(email=email).first()
     if user.email_confirmed:
-        flash('Email has already been confirmed Please login')
+        return jsonify(message='Email has already benn confirmed please login')
+    # flash('Email has already been confirmed Please login')
     else:
         user.email_confirmed = True
         db.session.add(user)
         db.session.commit()
-        flash('You have confirmed your account')
-    return redirect(url_for('login'))
+        return jsonify({
+            'status': True,
+            'msg': 'Your email has been confirmed',
+            'url': '/login'
+        })
+    #  return redirect(url_for('login'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -174,7 +185,7 @@ def login():
     # return render_template('login.html', form=form)
 
 
-@app.route('/reset', methods=['GET', 'POST'])
+@app.route('/reset', methods=['POST'])
 def reset():
     form = EmailForm()
 
