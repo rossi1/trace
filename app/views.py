@@ -22,15 +22,19 @@ def server_error(e):
                                 'code':500})
     # return render_template('500'.html'), 500
 
-
 @app.before_request
 def before_request():
     if current_user.is_authenticated:
         return jsonify({
             'msg': 'User already logged in',
-            'url': '/index'
-            'code': 200
+            'url': '/'
             })
+    else:
+        return jsonify({
+            'msg': 'User not logged in',
+            'url': '/login'
+        })
+        
 
         #  return redirect(url_for('index'))
 
