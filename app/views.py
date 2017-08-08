@@ -1,28 +1,46 @@
 from app import app
-from flask import render_template, request, redirect, url_for, flash, abort
-from .forms import RegistrationForm, LoginForm, EmailForm, PasswordForm, CompleteRegistrationForm
-from .models import User
+from flask import render_template, request, redirect, url_for, flash, abort, g, jsonify, make_response
+from .forms import RegistrationForm, LoginForm, EmailForm, PasswordForm, CompleteForm
+from .models import User, PrivateDetails
 from app import db
 from flask_login import login_required, current_user, login_user,  logout_user
 from .security import generate_confirmation_token, confirm_token
-from .email import  send_email
-
+from .email import send_email
+from sqlalchemy.exc import IntegrityError
 
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return make_response(jsonify({'error': 'Page not found'}), 404)
+    # return render_template('404.html'), 404
 
 
 @app.errorhandler(500)
 def server_error(e):
-    return render_template('500.html'), 500
+    return make_response(jsonify(error='Internal server error'), 500)
+    # return render_template('500'.html'), 500
+
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        return jsonify({
+            'Message': 'User already logged in',
+            'url': url_for('index')
+            })
+
+        #  return redirect(url_for('index'))
 
 
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    return jsonify({
+        'code': 200,
+        'status': 'okay'
+    })
+
+    #  return render_template('index.html')
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -34,10 +52,12 @@ def signup():
         try:
             db.session.add(user)
             db.session.commit()
-        except:
+        except IntegrityError:
             db.session.rollback()
 
-        #  this generate a token for the user email
+            #  The following lines of code
+            #  is the confirmation email being sent
+            #  to the  user
 
         token = generate_confirmation_token(user.email)
 
@@ -47,13 +67,30 @@ def signup():
 
         subject = 'Please confirm your Email'
 
+        # send_email function was imported from
+        # the email file
+
         send_email(user.email, subject, html)
 
-        flash('A confirmation Email has been sent to you via Email')
+        return jsonify({
+            'status': True,
+            'code': 200,
+            'msg': 'A confirmation email has been sent to you',
+            'url': url_for('complete_signup')
+        })
 
-        return redirect(url_for('complete_signup'))
+    else:
 
-    return render_template('register.html', form=form)
+        return jsonify({
+            'status': False,
+            'msg': 'Please check your post form'
+        })
+
+    #  return render_template('register.html', form=form)
+
+
+
+
 
 
 @app.route('/completesignup', methods=['GET', 'POST'])
