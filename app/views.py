@@ -11,13 +11,15 @@ from sqlalchemy.exc import IntegrityError
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return make_response(jsonify({'error': 'Page not found'}), 404)
+    return make_response(jsonify({'error': 'Page not found',
+                                'code': 404)}
     # return render_template('404.html'), 404
 
 
 @app.errorhandler(500)
 def server_error(e):
-    return make_response(jsonify(error='Internal server error'), 500)
+    return make_response(jsonify({'error':'Internal server error',
+                                'code':500})
     # return render_template('500'.html'), 500
 
 
