@@ -234,7 +234,7 @@ def reset_with_token(token):
 def logout():
     logout_user()
     return jsonify({
-        'message': 'You have been logged out',
+        'msg': 'You have been logged out',
         'url': '/login'
     })
     # return redirect(url_for('login'))
