@@ -217,5 +217,8 @@ def reset_with_token(token):
 @login_required
 def logout():
     logout_user()
-    flash('you have been logged out')
-    return redirect(url_for('login'))
+    return jsonify({
+        'message': 'You have been logged out',
+        'url': '/login'
+    })
+    # return redirect(url_for('login'))
