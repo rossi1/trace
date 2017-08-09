@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm, RecaptchaField
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, RadioField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, IntegerField
 from wtforms.validators import DataRequired, EqualTo, Email, ValidationError, Length, Optional
 from .models import User
 
@@ -9,15 +9,17 @@ class RegistrationForm(FlaskForm):
     full_name = StringField('Full Name',  validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired(), Length(min=5, max=10)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), EqualTo('confirm_password', message='Password must match')])
+    password = PasswordField('Password', validators=[DataRequired(), EqualTo('confirm_password',
+                                                                             message='Password must match')])
     confirm_password = PasswordField('reenter password', validators=[DataRequired()])
-    submit = SubmitField('Submit')
-
+    re_captcha = RecaptchaField()
+    submit = SubmitField('Create account')
 
     def validate_email(self, field):
         """This method raises an error if the email is already in the db"""
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('This email already exist with an account')
+
 
     def validate_username(self, field):
         """This method raises an error if the username already exits in db"""
@@ -25,16 +27,15 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('This Username is already taken')
 
 
-class CompleteRegistrationForm(FlaskForm):
+class CompleteForm(FlaskForm):
     address = StringField('Address', validators=[DataRequired()])
     city = StringField('City', validators=[DataRequired()])
     state = StringField('State', validators=[DataRequired()])
-    postal_code = StringField('Postal code', validators=[Optional()])
-    phone_number = StringField('Phone number', validators={DataRequired()})
+    postal_code = IntegerField('Postal code', validators=[Optional()])
+    phone_number = IntegerField('Phone number', validators={DataRequired()})
     date_of_birth = DateField('Date of birth', validators=[Optional()], format='%Y/%m/%d')
-    recaptha = RecaptchaField()
     accept_tos = BooleanField('Accept', default=False, validators=[DataRequired()])
-    submit = SubmitField('Create Account')
+    submit = SubmitField('Continue')
 
 
 class LoginForm(FlaskForm):
@@ -45,20 +46,21 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign in')
 
 
-"""The following two forms belows handles the reset password recovery
-"""
-
-
 class EmailForm(FlaskForm):
+    """This class renders the forms for validating email for the recovering of password"""
     email = StringField('Email', validators=[DataRequired(), Email()])
+    captcha = RecaptchaField()
     submit = SubmitField('submit')
 
+    #  validating the email address
     def validate_email(self, field):
         if not User.query.filter_by(email=field.data).first():
             raise ValidationError('This Email does not exist with any account')
 
 
 class PasswordForm(FlaskForm):
-    password = PasswordField('Password', validators=[DataRequired(), EqualTo('confirm_password', message='Password must match')])
+    """This class renders the forms for re setting passwords"""
+    password = PasswordField('Password', validators=[DataRequired(), EqualTo('confirm_password',
+                                                                             message='Password must match')])
     confirm_password = PasswordField('Confirm Password')
     submit = SubmitField('submit')
