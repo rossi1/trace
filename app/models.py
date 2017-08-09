@@ -22,8 +22,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String)
     email_confirmed = db.Column(db.Boolean, default=False)
-
-
+    account_confirmed = db.Column(db.Boolean, default=False)
+    user = db.relationship('PrivateDetails', backref='users', lazy='dynamic')
 
     @property
     def password(self):
@@ -44,6 +44,9 @@ class User(UserMixin, db.Model):
 
 
 class PrivateDetails(db.Model):
+
+    __tablename__ = 'private'
+
     id = db.Column(db.Integer, primary_key=True)
     address = db.Column(db.String(200))
     city = db.Column(db.String(160))
@@ -51,8 +54,7 @@ class PrivateDetails(db.Model):
     postal_code = db.Column(db.String(50))
     phone_number = db.Column(db.String)
     date_of_birth = db.Column(db.DateTime)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'))
 
     def __repr__(self):
         return 'User {}'.format(self.address)
