@@ -10,7 +10,18 @@ from sqlalchemy.exc import IntegrityError
 from functools import wraps
 
 
+def after_registration(f):
+    """This decorator is used to protect the second sign up form after being filled up"""
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if current_user.account_confirmed is True:
+            return redirect(url_for('index'))
+        return False
+    return wrap
+
+
 def complete_registration(f):
+    """This decorator is used to ensure that the second sign up form was filled up"""
     @wraps(f)
     def wrap(*args, **kwargs):
 
@@ -163,6 +174,14 @@ def confirm_email(token):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+                         
+                         
+   if current_user.is_authenticated and current_user.email_confirmed:
+        return jsonify({
+            'msg': 'user already logged in',
+            'url': '/index'
+        })
+                             
     form = LoginForm()
 
     if form.validate_on_submit():
