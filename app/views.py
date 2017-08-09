@@ -11,7 +11,7 @@ from functools import wraps
 
 
 def after_registration(f):
-    """This decorator is used to protect the second sign up form after being filled up"""
+    """This decorator is used to protect the second sign up form from being accessed after being filled up"""
     @wraps(f)
     def wrap(*args, **kwargs):
         if current_user.account_confirmed is True:
