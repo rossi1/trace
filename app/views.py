@@ -52,11 +52,13 @@ def before_request():
                          
 @app.route('/')
 @login_required
+@complete_registration
 def index():
     return jsonify({
         'code': 200,
-        'status': True
+        'status': 'okay'
     })
+
 
     #  return render_template('index.html')
 
@@ -108,6 +110,7 @@ def signup():
 
 @app.route('/complete/signup', methods=['GET', 'POST'])
 @login_required
+@after_registration
 def complete_signup():
 
     form = CompleteForm()
@@ -223,46 +226,54 @@ def login():
     # return render_template('login.html', form=form)
 
 
-@app.route('/reset/password', methods=['POST'])
+@app.route('/reset/password', methods=['GET', 'POST'])
 def reset():
     form = EmailForm()
 
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
 
-        if user.email_confirmed:
+        if user and user.email_confirmed:
+
             subject = 'Password reset requested'
-            token = generate_confirmation_token(user.email)
-            recover_url = url_for('reset_with_token', token=token, _external=True)
+
+            token = generate_recovery_token(user.email)
+
+            recover_url = url_for('reset_password_with_token', token=token, _external=True)
+
             html = render_template('recover.html', recover_url=recover_url)
+
             send_email(user.email, subject, html)
+
             flash('A confirmation link to reset your password has been sent to you')
+
             return redirect(url_for('login'))
+
         else:
             flash('This Email hasnt been confirmed yet')
-            return 'Email not confirmed'
 
     return render_template('reset.html', form=form)
 
 
-@app.route('/reset/<token>')
-def reset_with_token(token):
+@app.route('/reset/<token>', methods=['GET', 'POST'])
+def reset_password_with_token(token):
     try:
-        email = confirm_token(token, expiration=3600)
+        email = confirm_recovery_token(token)
 
-    except Exception as e:
+    except:
         flash('The confirmation link is invalid or has expired.', 'danger')
         abort(400)
+
     form = PasswordForm()
 
     if form.validate_on_submit():
         user = User.query.filter_by(email=email).first()
-        user = form.password.data
+        user.password = form.password.data
 
         db.session.add(user)
         db.session.commit()
         return redirect(url_for('login'))
-    return render_template('reset_password.html', form=form)
+    return render_template('reset_password.html', form=form, token=token)
 
 
 @app.route('/logout')
