@@ -23,16 +23,18 @@ class DevelopmentConfig:
     # RecaptchaField config
 
     RECAPTCHA_PUBLIC_KEY = '6LfFNysUAAAAAH8XvHjiSSpCpxrJc95vI-uN5Swy'
-    RECAPTCHA_PRIVATE_KEY = os.environ.get('key')  # this key should be kept secret
+    RECAPTCHA_PRIVATE_KEY = '6LfFNysUAAAAAHbiD_yVYEG9rZfrft48x9VPHzl6'  # this key should be kept secret
 
     # Mail Settings
 
     MAIL_SERVER = 'smtp.googlemail.com'
     MAIL_USE_TLS = True
     MAIL_PORT = 587
-    MAIL_USERNAME = os.environ.get('username')
-    MAIL_PASSWORD = os.environ.get('password')
+    MAIL_USERNAME = ''
+    MAIL_PASSWORD = ''
     MAIL_DEFAULT_SENDER = 'myapp@app.com'
 
-    SECURITY_PASSWORD_SALT = 'password-reset-salt' # salt used for forgot password
+    SECURITY_PASSWORD_SALT = 'password-reset-salt'  # salt used for forgot password
     SECURITY_EMAIL_SALT = 'email-confirmation-salt'  # salt used for email confirmation
+
+    RESEND_EMAIL_SALT = 'resend-email-confirmation'  # should remain secret
