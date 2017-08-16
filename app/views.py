@@ -48,7 +48,7 @@ def server_error(e):
 
 @app.errorhandler(400)
 def link_error(e):
-    return make_response(jsonify(error='This link is broken or has expired'))
+    return make_response(jsonify(error='This link is broken or has expired'), 400)
 
 
 @app.before_request
