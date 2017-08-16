@@ -9,11 +9,10 @@ class RegistrationForm(FlaskForm):
     full_name = StringField('Full Name',  validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired(), Length(min=5, max=10)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), EqualTo('confirm_password',
-                                                                             message='Password must match')])
-    confirm_password = PasswordField('reenter password', validators=[DataRequired()])
+    confirm_email = StringField('reenter email', validators=[DataRequired(), Email(), EqualTo('email', message='email must match')])
+    password = PasswordField('Password', validators=[DataRequired()])
     re_captcha = RecaptchaField()
-    submit = SubmitField('Create account')
+    submit = SubmitField('Submit')
 
     def validate_email(self, field):
         """This method raises an error if the email is already in the db"""
@@ -64,3 +63,17 @@ class PasswordForm(FlaskForm):
                                                                              message='Password must match')])
     confirm_password = PasswordField('Confirm Password')
     submit = SubmitField('submit')
+
+
+class ResendEmailForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Submit')
+
+    def validate_email(self, field):
+
+        if not User.query.filter_by(email=field.data).first():
+            raise ValidationError('This Email does\'nt exist with any account')
+
+
+
+
