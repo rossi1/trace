@@ -23,7 +23,7 @@ class DevelopmentConfig:
     # RecaptchaField config
 
     RECAPTCHA_PUBLIC_KEY = '6LfFNysUAAAAAH8XvHjiSSpCpxrJc95vI-uN5Swy'
-    RECAPTCHA_PRIVATE_KEY = '6LfFNysUAAAAAHbiD_yVYEG9rZfrft48x9VPHzl6'  # this key should be kept secret
+    RECAPTCHA_PRIVATE_KEY = os.getenv('private key')  # this key should be kept secret
 
     # Mail Settings
 
